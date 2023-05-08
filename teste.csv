@@ -1,0 +1,7 @@
+id;compras
+1;pao,manteiga,leite
+2;manteiga,leite,cafe
+3;cafe,adocante
+4;pao,manteiga,cafe
+5;pao,manteiga,leite,adocante
+6;pao,manteiga,leite,cafe
