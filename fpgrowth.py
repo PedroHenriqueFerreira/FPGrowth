@@ -1,4 +1,5 @@
 from typing import Any
+from itertools import combinations
 
 from database import DataBase
 
@@ -38,14 +39,14 @@ class FPNode:
     def get_path(self):
         node = self
         
-        path = []
+        path: list[str] = []
         
         while node.parent is not None and node.parent.name is not None:
             path.append(node.parent.name)
             
             node = node.parent
             
-        print(path)
+        return path
 
 class FPGrowth:
     def __init__(self, transactions: DataBase, min_support: float = 0.5):
@@ -70,7 +71,6 @@ class FPGrowth:
                 continue
             
             del item_support[column]
-            
         
         item_support = dict(sorted(item_support.items(), key=lambda i: i[1], reverse=True))
         
@@ -91,3 +91,60 @@ class FPGrowth:
                 path.remove(column)
                     
             fpTree.insert_path(path)
+        
+        conditional_pattern: dict[str, dict[str, float]] = {}
+            
+        for column in reversed(item_support.keys()):
+            nodes = fpTree.nodes[column]
+            
+            for node in nodes:
+                path = node.get_path()
+                
+                for item in path:
+                    if column not in conditional_pattern:
+                        conditional_pattern[column] = {}
+                    
+                    if item not in conditional_pattern[column]:
+                        conditional_pattern[column][item] = 0
+                    
+                    conditional_pattern[column][item] += node.count * support_per_item
+            
+            if column not in conditional_pattern:
+                continue
+            
+            for item in list(conditional_pattern[column].keys()):
+                if column not in conditional_pattern:
+                    continue
+                
+                if conditional_pattern[column][item] >= self.min_support:
+                    continue
+                
+                del conditional_pattern[column][item]
+        
+        frequent_itemsets: dict[tuple[str, ...], float] = {}
+        
+        for column in conditional_pattern:
+            for i in range(2, len(conditional_pattern[column].keys()) + 2):
+                values = list(combinations([column, *conditional_pattern[column].keys()], i))
+                
+                for value in values:
+                    if column not in value:
+                        continue
+                    
+                    support = []
+                    
+                    for item in value:
+                        if item == column:
+                            continue
+                        
+                        support.append(conditional_pattern[column][item])
+                    
+                    frequent_itemsets[value] = min(support)
+        
+        frequent_itemsets = dict(sorted(frequent_itemsets.items(), key=lambda i: i[1], reverse=True))
+        
+        for item in item_support:
+            print(f'{item_support[item]:.2f}', item)
+            
+        for item in frequent_itemsets:
+            print(f'{frequent_itemsets[item]:.2f}', item)

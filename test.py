@@ -10,12 +10,12 @@ transaction_encoder = TransactionEncoder()
 transations_transformed = transaction_encoder.fit(transations).transform(transations)
 transations_table = pd.DataFrame(transations_transformed, columns=transaction_encoder.columns_)
 
-print(transations_table)
+# print(transations_table)
 
-frequent_itemsets = fpgrowth(transations_table, min_support=0.25, use_colnames=True)
+frequent_itemsets = fpgrowth(transations_table, min_support=0.5, use_colnames=True)
 
 print(frequent_itemsets)
 
-result = association_rules(frequent_itemsets, metric='confidence', min_threshold=0.8)
+# result = association_rules(frequent_itemsets, metric='confidence', min_threshold=0.01)
 
-print(result)
+# print(result)
