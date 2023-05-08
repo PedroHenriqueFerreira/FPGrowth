@@ -1,7 +1,7 @@
 from database import DataBase
 from fpgrowth import FPGrowth
 
-db = DataBase.read_csv('teste.csv', ';')
+db = DataBase.read_csv('test.csv', ';')
 
 conj_desc_erro = db.get_column('compras', key=lambda i: i.split(','))
 

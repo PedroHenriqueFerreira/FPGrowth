@@ -3,7 +3,7 @@ import pandas as pd
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import fpgrowth, association_rules
 
-data = pd.read_csv('teste.csv', sep=';')
+data = pd.read_csv('test.csv', sep=';')
 transations = [item.split(',') for item in data['compras'].dropna()]
 
 transaction_encoder = TransactionEncoder()
