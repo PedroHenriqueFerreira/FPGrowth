@@ -53,31 +53,41 @@ class FPGrowth:
         self.transactions = transactions
         self.min_support = min_support
         
-        self.get_item_support()
+        self.items_support = self.get_items_support()
         
-    def get_item_support(self):
-        item_support: dict[str, float] = {column:0 for column in self.transactions.columns}
-        support_per_item = 1 / len(self.transactions.data)
+        self.main()
+    
+    def get_items_support(self):
+        items_support: dict[str, float] = {}
+        support = 1 / len(self.transactions.data)
         
         for row in self.transactions.data:
             for i, item in enumerate(row):
                 if not item:
                     continue
+                
+                column = self.transactions.columns[i]
+                
+                if column not in items_support:
+                    items_support[column] = 0
                     
-                item_support[self.transactions.columns[i]] += support_per_item
-            
-        for column in item_support.copy():
-            if item_support[column] >= self.min_support:
+                items_support[column] += support
+    
+        for item_support in items_support.copy():
+            if items_support[item_support] >= self.min_support:
                 continue
             
-            del item_support[column]
+            del items_support[item_support]
+            
+        items_support = dict(sorted(items_support.items(), key=lambda i: i[1], reverse=True))
+    
+        return items_support
         
-        item_support = dict(sorted(item_support.items(), key=lambda i: i[1], reverse=True))
-        
+    def main(self):
         fpTree = FPTree()
         
         for row in self.transactions.data:
-            path = list(item_support.keys())
+            path = list(self.items_support.keys())
             
             for i, item in enumerate(row):
                 if item:
@@ -94,7 +104,9 @@ class FPGrowth:
         
         conditional_pattern: dict[str, dict[str, float]] = {}
             
-        for column in reversed(item_support.keys()):
+        support_per_item = 1 / len(self.transactions.data)
+            
+        for column in reversed(self.items_support.keys()):
             nodes = fpTree.nodes[column]
             
             for node in nodes:
@@ -143,8 +155,10 @@ class FPGrowth:
         
         frequent_itemsets = dict(sorted(frequent_itemsets.items(), key=lambda i: i[1], reverse=True))
         
-        for item in item_support:
-            print(f'{item_support[item]:.2f}', item)
+        for item in self.items_support:
+            print(f'{self.items_support[item]:.2f}', item)
             
         for item in frequent_itemsets:
             print(f'{frequent_itemsets[item]:.2f}', item)
+            
+        print(len(self.items_support) + len(frequent_itemsets))

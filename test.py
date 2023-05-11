@@ -1,7 +1,11 @@
+import time
+
 import pandas as pd
 
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import fpgrowth, association_rules
+
+ini = time.time()
 
 data = pd.read_csv('test.csv', sep=';')
 transations = [item.split(',') for item in data['compras'].dropna()]
@@ -14,7 +18,11 @@ transations_table = pd.DataFrame(transations_transformed, columns=transaction_en
 
 frequent_itemsets = fpgrowth(transations_table, min_support=0.5, use_colnames=True)
 
+end = time.time()
+
 print(frequent_itemsets)
+
+print(end - ini)
 
 # result = association_rules(frequent_itemsets, metric='confidence', min_threshold=0.01)
 
