@@ -7,11 +7,14 @@ ini = time.time()
 
 db = DataBase.read_csv('test.csv', ';')
 
-conj_desc_erro = db.get_column('compras', key=lambda i: i.split(','))
+def getKey(i):
+    return i.split(',')
+
+conj_desc_erro = db.get_column('erros', key=getKey)
 
 transactions = DataBase.transaction_encoder(conj_desc_erro)
 
-fpGrowth = FPGrowth(transactions, 0.5)
+fpGrowth = FPGrowth(transactions, 0.45)
 
 end = time.time()
 
