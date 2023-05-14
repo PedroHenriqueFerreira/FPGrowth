@@ -14,8 +14,13 @@ conj_desc_erro = db.get_column('erros', key=getKey)
 
 transactions = DataBase.transaction_encoder(conj_desc_erro)
 
-fpGrowth = FPGrowth(transactions, 0.45)
-
+fpGrowth = FPGrowth(transactions, 0.3)
 end = time.time()
+
+for frequent_itemset in fpGrowth.frequent_itemsets:
+    print(frequent_itemset, fpGrowth.frequent_itemsets[frequent_itemset])
+
+print(len(fpGrowth.frequent_itemsets))
+
 
 print(end - ini)

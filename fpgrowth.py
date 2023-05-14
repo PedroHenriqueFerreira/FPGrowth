@@ -72,14 +72,6 @@ class FPGrowth:
         self.conditional_tree = self.get_conditional_tree()
         self.frequent_itemsets = self.get_frequent_itemsets()
 
-        print(self.frequent_items)
-        print(self.conditional_tree)
-        
-        for frequent_itemset in self.frequent_itemsets:
-            print(frequent_itemset, self.frequent_itemsets[frequent_itemset])
-
-        print(len(self.frequent_itemsets))
-
     def get_frequent_items(self):
         frequent_items: dict[str, float] = {}
         
@@ -131,7 +123,11 @@ class FPGrowth:
                     continue
                 
                 del conditional_tree[frequent_item][item]
+                
+            if conditional_tree[frequent_item] != {}:
+                continue
             
+            del conditional_tree[frequent_item]
                 
         return conditional_tree
     
@@ -140,13 +136,32 @@ class FPGrowth:
         
         for conditional_item in self.conditional_tree:
             itemset = self.conditional_tree[conditional_item]
+            nodes = [[node.get_path(), node.count] for node in self.fp_tree.nodes[conditional_item]]
             
             for i in range(1, len(itemset) + 1):
                 for combination in combinations(itemset, i):
-                    support = min([itemset[item] for item in itemset if item in combination])
+                    if len(combination) == 1:
+                        frequent_itemsets[(conditional_item, *combination)] = itemset[combination[0]]
+                        continue
+            
+                    support = 0.0
+                    
+                    for node in nodes:
+                        is_valid = True
+                        
+                        for item in combination:
+                            if item not in node[0]:
+                                is_valid = False
+                                break
+                        
+                        if not is_valid:
+                            continue
+    
+                        support += node[1] * self.item_support
+                    
+                    if support < self.min_support:
+                        continue
                     
                     frequent_itemsets[(conditional_item, *combination)] = support
 
-        frequent_itemsets = dict(sorted(frequent_itemsets.items(), key=lambda i:i[1], reverse=True))
-
-        return frequent_itemsets
+        return {**self.frequent_items, **frequent_itemsets}

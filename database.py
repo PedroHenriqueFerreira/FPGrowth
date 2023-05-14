@@ -29,26 +29,10 @@ class DataBase:
     @staticmethod
     def transaction_encoder(data: list[list[str]]) -> 'DataBase':
         columns: set[str] = set()
-        # remove
-        count = 0
-        find = ['D050', 'D069', 'D067']
-        # remove
+        
         for rows in data:
-            # remove
-            add = 1
-            for item in find:
-                if item not in rows:
-                    add = 0
-                
-            count += add
-            # remove
-            
             for item in rows:
                 columns.add(item)
-        
-        # remove
-        print(count / len(data))
-        # remove
         
         columns_sorted = sorted(columns)
         columns_mapping = {v:i for i,v in enumerate(columns_sorted)}
