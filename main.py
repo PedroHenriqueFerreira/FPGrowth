@@ -11,4 +11,4 @@ transactions = db.get_column_data('CONJ_DESC_ERRO', key=lambda i: i.split(','))
 
 associations = FPGrowth(transactions).get_associations()
 
-print(associations.filter({ 'lift': (0, 2) }))
+print(associations.filter({ 'lift': (1, 2) }))
