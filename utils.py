@@ -11,3 +11,6 @@ def less_than(value: float):
 
 def between(start: float, end: float):
     return lambda i: i >= start and i <= end
+
+def one_of(*values: Any):
+    return lambda i: i in values
