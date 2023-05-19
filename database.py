@@ -1,11 +1,13 @@
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
+
+T = TypeVar('T')
 
 class DataBase:
     def __init__(self, columns: list[str], data: list[list[Any]]):
         self.columns = columns
         self.data = data
         
-    def get_column(self, column: str, key: Callable[[str], Any] = lambda i: i) -> list[Any]:
+    def get_column(self, column: str, key: Callable[[str], T]) -> list[T]:
         index = self.columns.index(column)
         
         return [key(rows[index]) for rows in self.data if rows[index]]
