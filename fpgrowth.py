@@ -9,12 +9,12 @@ class FPTree:
     def __init__(self, frequent_items: dict[str, int]):
         self.root = FPNode()
         
+        self.frequent_items = frequent_items
+        
         self.nodes: dict[str, list[FPNode]] = {}
         self.conditional_items: list[str] = []
     
-        self.frequent_items = frequent_items
-    
-    def is_path(self):
+    def has_single_path(self):
         if len(self.root.children) > 1:
             return False
         
@@ -40,20 +40,16 @@ class FPTree:
                 
                 parents_support[item] += node.count
         
-        for item in parents_support.copy():
-            if parents_support[item] >= min_support:
-                continue
-                
-            del parents_support[item]
-        
-        parents_support = dict(sorted(parents_support.items(), key=lambda i:i[1], reverse=True))
+        parents_support = {k:parents_support[k] for k in parents_support if parents_support[k] >= min_support}
+        parents_support = sorted(parents_support, key=parents_support.get, reverse=True) #type: ignore
 
         fp_tree = FPTree(parents_support)
         
         for i, path in enumerate(paths):
             fp_tree.insert_path(path, self.nodes[conditional_item][i].count)
-            
-        fp_tree.conditional_items = [*self.conditional_items, conditional_item]
+        
+        fp_tree.conditional_items.extend(self.conditional_items)
+        fp_tree.conditional_items.append(conditional_item)
         
         return fp_tree
         
@@ -107,9 +103,7 @@ class FPGrowth:
         self.transactions = transactions
         self.min_support = ceil(min_support * len(transactions.data))
     
-        self.frequent_items = self.get_frequent_items()
-    
-        fp_tree = FPTree(self.frequent_items)
+        fp_tree = FPTree(self.get_frequent_items())
         
         for row in self.transactions.data:
             path = [self.transactions.columns[i] for i, item in enumerate(row) if item]
@@ -118,26 +112,7 @@ class FPGrowth:
         
         self.frequent_itemsets: dict[tuple[str, ...], float] = {}
         
-        self.get_frequent_itemsets(fp_tree)
-
-    def get_frequent_itemsets(self, fp_tree: FPTree) -> None:
-        if fp_tree.is_path():
-            for i in range(1, len(fp_tree.nodes) + 1):
-                for itemset in combinations(fp_tree.nodes, i):
-                    
-                    support = min([fp_tree.nodes[item][0].count for item in itemset])
-                    
-                    self.frequent_itemsets[(*fp_tree.conditional_items, *itemset)] = support / len(self.transactions.data)
-            return
-        
-        for node in fp_tree.nodes:
-            support = sum([node.count for node in fp_tree.nodes[node]])
-            
-            self.frequent_itemsets[(*fp_tree.conditional_items, node)] = support / len(self.transactions.data)
-            
-            conditional_tree = fp_tree.conditional_tree(node, self.min_support)
-            
-            self.get_frequent_itemsets(conditional_tree)
+        self.generate_frequent_itemsets(fp_tree)
 
     def get_frequent_items(self):
         frequent_items: dict[str, int] = {}
@@ -153,13 +128,25 @@ class FPGrowth:
                     frequent_items[column] = 0
                     
                 frequent_items[column] += 1
-    
-        for frequent_item in frequent_items.copy():
-            if frequent_items[frequent_item] >= self.min_support:
-                continue
             
-            del frequent_items[frequent_item]
-            
-        frequent_items = dict(sorted(frequent_items.items(), key=lambda i:i[1], reverse=True))
+        frequent_items = {k:frequent_items[k] for k in frequent_items if frequent_items[k] >= self.min_support}
+        frequent_items = sorted(frequent_items, key=frequent_items.get, reverse=True) # type: ignore
     
         return frequent_items
+
+    def generate_frequent_itemsets(self, fp_tree: FPTree) -> None:
+        if fp_tree.has_single_path():
+            for i in range(1, len(fp_tree.nodes) + 1):
+                for itemset in combinations(fp_tree.nodes, i):
+                    support = min([fp_tree.nodes[item][0].count for item in itemset]) / len(self.transactions.data)
+                    
+                    self.frequent_itemsets[(*fp_tree.conditional_items, *itemset)] = support
+            return
+        
+        for node in fp_tree.nodes:
+            support = sum([node.count for node in fp_tree.nodes[node]]) / len(self.transactions.data)            
+            
+            self.frequent_itemsets[(*fp_tree.conditional_items, node)] = support 
+            
+            conditional_tree = fp_tree.conditional_tree(node, self.min_support)
+            self.generate_frequent_itemsets(conditional_tree)

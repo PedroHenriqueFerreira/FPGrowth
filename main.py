@@ -3,22 +3,28 @@ from fpgrowth import FPGrowth
 
 import time
 
-ini = time.time()
+intervals: list[float] = []
 
-db = DataBase.read_csv('test.csv', ';')
+for i in range(10):
+    print(f'process {i + 1} de {10}')
+    
+    ini = time.time()
 
-conj_desc_erro = db.get_column('erros', key=lambda i: i.split(','))
+    db = DataBase.read_csv('test.csv', ';')
 
-transactions = DataBase.transaction_encoder(conj_desc_erro)
+    conj_desc_erro = db.get_column('erros', key=lambda i: i.split(','))
 
-fp_growth = FPGrowth(transactions, 0.4)
+    transactions = DataBase.transaction_encoder(conj_desc_erro)
 
-end = time.time()
+    fp_growth = FPGrowth(transactions, 0.5)
 
-for frequent_itemset in fp_growth.frequent_itemsets:
-    print(frequent_itemset, fp_growth.frequent_itemsets[frequent_itemset])
+    end = time.time()
 
-print(len(fp_growth.frequent_itemsets))
+    # for frequent_itemset in fp_growth.frequent_itemsets:
+    #     print(frequent_itemset, fp_growth.frequent_itemsets[frequent_itemset])
 
+    # print(len(fp_growth.frequent_itemsets))
 
-print(end - ini)
+    intervals.append(end - ini)
+    
+print(sum(intervals) / len(intervals))
