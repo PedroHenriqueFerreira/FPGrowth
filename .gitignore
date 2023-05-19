@@ -1,3 +1,1 @@
-*.mypy_cache
-*__pycache__
-venv
+./test.py
