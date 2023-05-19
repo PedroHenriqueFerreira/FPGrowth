@@ -9,6 +9,7 @@ Este repositório contém a implementação do algoritmo FP Growth em python tot
 Primeiramente é necessário ter o `python` em sua máquina.
 
 ## Execução
+
 ```
 $ python main.py
 ```
