@@ -99,8 +99,10 @@ class FPNode:
         return path
 
 class FPGrowth:
-    def __init__(self, transactions: list[list[str]], min_support: float = 0.5):
+    def __init__(self, transactions: list[list[str]], min_support: float = 0.5, decimal_precision: int = 6):
         self.transactions = transactions
+        self.decimal_precision = decimal_precision
+        
         self.min_count = ceil(min_support * len(transactions))
     
         fp_tree = FPTree(self.get_frequent_items())
@@ -130,16 +132,64 @@ class FPGrowth:
     def generate_frequent_itemsets(self, fp_tree: FPTree) -> None:
         if fp_tree.has_single_path():
             for i in range(1, len(fp_tree.nodes) + 1):
-                for itemset in combinations(fp_tree.nodes, i):
-                    support = min([fp_tree.nodes[item][0].count for item in itemset]) / len(self.transactions)
+                for combination in combinations(fp_tree.nodes, i):
+                    support = min([fp_tree.nodes[item][0].count for item in combination]) / len(self.transactions)
                     
-                    self.frequent_itemsets[(*fp_tree.conditional_items, *itemset)] = support
+                    itemset = tuple(sorted((*fp_tree.conditional_items, *combination)))
+                    
+                    self.frequent_itemsets[itemset] = round(support, self.decimal_precision)
             return
         
         for node in fp_tree.nodes:
             support = sum([node.count for node in fp_tree.nodes[node]]) / len(self.transactions)            
             
-            self.frequent_itemsets[(*fp_tree.conditional_items, node)] = support 
+            itemset = tuple(sorted((*fp_tree.conditional_items, node)))
+            
+            self.frequent_itemsets[itemset] = round(support, self.decimal_precision)
             
             conditional_tree = fp_tree.conditional_tree(node, self.min_count)
             self.generate_frequent_itemsets(conditional_tree)
+            
+    def get_info(self):
+        data: list[list[tuple[str, ...] | float]] = []
+        
+        for frequent_itemset in self.frequent_itemsets:
+            if len(frequent_itemset) == 1:
+                continue
+            
+            support = self.frequent_itemsets[frequent_itemset]
+            
+            for i in range(1, len(frequent_itemset)):
+                for antecedent in combinations(frequent_itemset, i):
+                    consequent = tuple(sorted(set(frequent_itemset) - set(antecedent)))
+                    
+                    antecedent_support = round(self.frequent_itemsets[antecedent], self.decimal_precision)
+                    consequent_support = round(self.frequent_itemsets[consequent], self.decimal_precision)
+                    
+                    confidence = round(support / antecedent_support, self.decimal_precision)
+                    conviction = round((1 - consequent_support) / (1 - confidence), self.decimal_precision)
+                    lift = round(confidence / consequent_support, self.decimal_precision)
+                    
+                    data.append([
+                        antecedent, 
+                        consequent, 
+                        antecedent_support, 
+                        consequent_support, 
+                        support, 
+                        confidence, 
+                        conviction, 
+                        lift
+                    ])  
+            
+        columns = [
+            'antecedent', 
+            'consequent', 
+            'antecedent_support', 
+            'consequent_support', 
+            'support', 
+            'confidence', 
+            'conviction', 
+            'lift'
+        ]
+            
+        return DataBase(columns, data)
