@@ -130,7 +130,6 @@ class FPGrowth:
             for i in range(1, len(fp_tree.nodes) + 1):
                 for combination in combinations(fp_tree.nodes, i):
                     support = min([fp_tree.nodes[item][0].count for item in combination]) / len(self.transactions)
-                    
                     itemset = tuple(sorted((*fp_tree.conditional_items, *combination)))
                     
                     self.frequent_itemsets[itemset] = round(support, self.decimal_precision)
@@ -138,7 +137,6 @@ class FPGrowth:
         
         for node in fp_tree.nodes:
             support = sum([node.count for node in fp_tree.nodes[node]]) / len(self.transactions)            
-            
             itemset = tuple(sorted((*fp_tree.conditional_items, node)))
             
             self.frequent_itemsets[itemset] = round(support, self.decimal_precision)
