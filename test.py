@@ -18,7 +18,7 @@ transations_table = pd.DataFrame(transations_transformed, columns=transaction_en
 
 # print(transations_table)
 
-frequent_itemsets = fpgrowth(transations_table, min_support=0.3, use_colnames=True)
+frequent_itemsets = fpgrowth(transations_table, min_support=0.4, use_colnames=True)
 
 end = time.time()
 

@@ -7,20 +7,18 @@ ini = time.time()
 
 db = DataBase.read_csv('test.csv', ';')
 
-def getKey(i):
-    return i.split(',')
-
-conj_desc_erro = db.get_column('erros', key=getKey)
+conj_desc_erro = db.get_column('erros', key=lambda i: i.split(','))
 
 transactions = DataBase.transaction_encoder(conj_desc_erro)
 
-fpGrowth = FPGrowth(transactions, 0.3)
+fp_growth = FPGrowth(transactions, 0.4)
+
 end = time.time()
 
-for frequent_itemset in fpGrowth.frequent_itemsets:
-    print(frequent_itemset, fpGrowth.frequent_itemsets[frequent_itemset])
+for frequent_itemset in fp_growth.frequent_itemsets:
+    print(frequent_itemset, fp_growth.frequent_itemsets[frequent_itemset])
 
-print(len(fpGrowth.frequent_itemsets))
+print(len(fp_growth.frequent_itemsets))
 
 
 print(end - ini)
