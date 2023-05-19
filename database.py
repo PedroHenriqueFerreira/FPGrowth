@@ -27,22 +27,3 @@ class DataBase:
                     data.append(values)
                     
         return DataBase(columns, data)
-    
-    @staticmethod
-    def transaction_encoder(data: list[list[str]]) -> 'DataBase':
-        columns: set[str] = set()
-        
-        for rows in data:
-            for item in rows:
-                columns.add(item)
-        
-        columns_sorted = sorted(columns)
-        columns_mapping = {v:i for i,v in enumerate(columns_sorted)}
-        
-        data_encoded = [[False for _ in columns_sorted] for _ in data]
-        
-        for i, rows in enumerate(data):
-            for item in rows:
-                data_encoded[i][columns_mapping[item]] = True
-        
-        return DataBase(columns_sorted, data_encoded)

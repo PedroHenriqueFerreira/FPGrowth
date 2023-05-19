@@ -9,8 +9,6 @@ db = DataBase.read_csv('test.csv', ';')
 
 conj_desc_erro = db.get_column('erros', key=lambda i: i.split(','))
 
-# transactions = DataBase.transaction_encoder(conj_desc_erro)
-
 fp_growth = FPGrowth(conj_desc_erro, 0.5)
 
 end = time.time()
