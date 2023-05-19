@@ -25,7 +25,7 @@ class DataBase:
             
         return '\n'.join(lines)
         
-    def filter(self, columns: dict[str, str | tuple[float, float]]):
+    def filter(self, columns: dict[str, Callable[[Any], bool]]):
         indexes = {self.columns.index(column): columns[column] for column in columns}
         
         data = []
@@ -34,14 +34,7 @@ class DataBase:
             is_invalid = False
             
             for index in indexes:
-                if isinstance(indexes[index], str):
-                    if row[index] != indexes[index]:
-                        is_invalid = True
-                        break
-                    
-                    continue
-                
-                if row[index] < indexes[index][0] or row[index] > indexes[index][1]:
+                if not indexes[index](row[index]):
                     is_invalid = True
                     break
             
