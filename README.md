@@ -2,7 +2,7 @@
 ![Concluido](http://img.shields.io/static/v1?label=STATUS&message=CONCLUÌDO&color=GREEN&style=for-the-badge)
 
 ## Descrição do repositório
-Este repositório contém a implementação do algoritmo FP Growth em python totalmente do zero.
+Este repositório contém a implementação do algoritmo FP Growth em python construído totalmente do zero.
 
 ## Primeiros passos
 
