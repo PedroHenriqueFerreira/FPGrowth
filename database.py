@@ -21,17 +21,72 @@ class DataBase:
         lines = []
         
         for row in [self.columns, *self.data]:
-            lines.append(' '.join([str(item).ljust(columns_width[i]) for i, item in enumerate(row)]))
+            lines.append('  '.join([str(item).ljust(columns_width[i]) for i, item in enumerate(row)]))
             
         return '\n'.join(lines)
         
-    def get_column(self, column: str, key: Callable[[str], T]) -> list[T]:
+    def filter(self, columns: dict[str, str | tuple[float, float]]):
+        indexes = {self.columns.index(column): columns[column] for column in columns}
+        
+        data = []
+        
+        for row in self.data:
+            is_invalid = False
+            
+            for index in indexes:
+                if isinstance(indexes[index], str):
+                    if row[index] != indexes[index]:
+                        is_invalid = True
+                        break
+                    
+                    continue
+                
+                if row[index] < indexes[index][0] or row[index] > indexes[index][1]:
+                    is_invalid = True
+                    break
+            
+            if is_invalid:
+                continue
+            
+            data.append(row)
+            
+        return DataBase(self.columns, data)
+        
+    def get_column_data(self, column: str, key: Callable[[str], T] = lambda i: i) -> list[T]: #type: ignore
         index = self.columns.index(column)
         
         return [key(rows[index]) for rows in self.data if rows[index]]
+    
+    def select_columns(self, columns: list[str]):
+        indexes = [self.columns.index(column) for column in columns]
+        
+        data = []
+        
+        for row in self.data:            
+            row = [row[index] for index in indexes]
+            
+            if len([item for item in row if not item]) > 0:
+                continue
+            
+            data.append(row)
+        
+        return DataBase(columns, data)
+    
+    def group_by(self, column: str):
+        index = self.columns.index(column)
+        
+        groups: dict[str, DataBase] = {}
+        
+        for row in self.data:
+            if row[index] not in groups:
+                groups[row[index]] = DataBase(self.columns, [])
+                
+            groups[row[index]].data.append(row)
+            
+        return groups
         
     @staticmethod
-    def read_csv(path: str, separator: str) -> 'DataBase':
+    def read_csv(path: str, separator: str = ',') -> 'DataBase':
         columns: list[str] = []
         data: list[list[Any]] = []
         

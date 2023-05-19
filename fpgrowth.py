@@ -150,8 +150,8 @@ class FPGrowth:
             conditional_tree = fp_tree.conditional_tree(node, self.min_count)
             self.generate_frequent_itemsets(conditional_tree)
             
-    def get_info(self):
-        data: list[list[tuple[str, ...] | float]] = []
+    def get_associations(self):
+        data: list[list[Any]] = []
         
         for frequent_itemset in self.frequent_itemsets:
             if len(frequent_itemset) == 1:
@@ -167,7 +167,10 @@ class FPGrowth:
                     consequent_support = round(self.frequent_itemsets[consequent], self.decimal_precision)
                     
                     confidence = round(support / antecedent_support, self.decimal_precision)
-                    conviction = round((1 - consequent_support) / (1 - confidence), self.decimal_precision)
+                    
+                    conviction = round((1 - consequent_support) / (1 - confidence), self.decimal_precision) \
+                        if 1 - confidence != 0 else 'infinite'
+                    
                     lift = round(confidence / consequent_support, self.decimal_precision)
                     
                     data.append([

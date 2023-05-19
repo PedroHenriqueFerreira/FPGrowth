@@ -1,12 +1,14 @@
 from database import DataBase
 from fpgrowth import FPGrowth
 
-db = DataBase.read_csv('test.csv', ';')
+db = DataBase.read_csv('SPAECE-MATEMATICA-LISTA-ACERTOS-ERROS-DISTRITO-TODOS.csv', ';')
 
-transactions = db.get_column('erros', key=lambda i: i.split(','))
+db = db.select_columns(['nm_turma', 'CONJ_DESC_ERRO'])
 
-fp_growth = FPGrowth(transactions, 0.4)
+db = db.filter({ 'nm_turma': '9AAT-98' })
 
-info = fp_growth.get_info()
+transactions = db.get_column_data('CONJ_DESC_ERRO', key=lambda i: i.split(','))
 
-print(info)
+associations = FPGrowth(transactions).get_associations()
+
+print(associations.filter({ 'lift': (0, 2) }))
