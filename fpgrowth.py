@@ -6,7 +6,7 @@ from itertools import combinations
 from database import DataBase
 
 class FPTree:
-    def __init__(self, frequent_items: dict[str, int]):
+    def __init__(self, frequent_items: list[str]):
         self.root = FPNode()
         
         self.frequent_items = frequent_items
@@ -41,9 +41,7 @@ class FPTree:
                 parents_count[item] += node.count
         
         parents_count = {k:parents_count[k] for k in parents_count if parents_count[k] >= min_count}
-        parents_count = sorted(parents_count, key=parents_count.get, reverse=True) #type: ignore
-
-        fp_tree = FPTree(parents_count)
+        fp_tree = FPTree(sorted(parents_count, key=parents_count.get, reverse=True)) # type: ignore
         
         for i, path in enumerate(paths):
             fp_tree.insert_path(path, self.nodes[conditional_item][i].count)
@@ -124,10 +122,8 @@ class FPGrowth:
                     
                 frequent_items[item] += 1
             
-        frequent_items = {k:frequent_items[k] for k in frequent_items if frequent_items[k] >= self.min_count}
-        frequent_items = sorted(frequent_items, key=frequent_items.get, reverse=True) # type: ignore
-    
-        return frequent_items
+        frequent_items = {k:frequent_items[k] for k in frequent_items if frequent_items[k] >= self.min_count}    
+        return sorted(frequent_items, key=frequent_items.get, reverse=True) # type: ignore
 
     def generate_frequent_itemsets(self, fp_tree: FPTree) -> None:
         if fp_tree.has_single_path():

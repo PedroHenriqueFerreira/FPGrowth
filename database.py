@@ -28,7 +28,7 @@ class DataBase:
     def filter(self, columns: dict[str, Callable[[Any], bool]]):
         indexes = {self.columns.index(column): columns[column] for column in columns}
         
-        data = []
+        data: list[list[Any]] = []
         
         for row in self.data:
             is_invalid = False
@@ -45,6 +45,7 @@ class DataBase:
             
         return DataBase(self.columns, data)
         
+    
     def get_column_data(self, column: str, key: Callable[[str], T] = lambda i: i) -> list[T]: #type: ignore
         index = self.columns.index(column)
         
